@@ -1,0 +1,1 @@
+cmd_/home/corey/Desktop/HASHDRIVER/mymodule.ko := ld -r -m elf_x86_64 -T ./scripts/module-common.lds --build-id  -o /home/corey/Desktop/HASHDRIVER/mymodule.ko /home/corey/Desktop/HASHDRIVER/mymodule.o /home/corey/Desktop/HASHDRIVER/mymodule.mod.o ;  true
