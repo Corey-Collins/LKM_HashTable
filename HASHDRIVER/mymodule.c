@@ -179,15 +179,31 @@ void display(void) {
 }
 
 
+char saveData[100];
+void getSaveData (void) {
+	int i;
+	char sKey[5], sData[5];
+	strncpy(saveData, "", sizeof(saveData));
+
+	for(i = 0; i<SIZE; i++) {
+	
+      if(hashArray[i] != NULL) {
+      	snprintf(sKey, sizeof(sKey), "%i", hashArray[i]->key);
+      	snprintf(sData, sizeof(sData), "%i", hashArray[i]->data);
+      	strcat(saveData, sKey);
+      	strcat(saveData, ",");
+      	strcat(saveData, sData);
+      	strcat(saveData, "\n");
+      }
+   }
+
+}
+
+
 /** END HASH AREA */
 
 
 int device_open(struct inode *inode, struct file *filp){
-
-	if(down_interruptible(&virtual_device.sem) != 0){
-		printk(KERN_ALERT "mydevice: could not lock device during open\n");
-		return -1;
-	}
 
 	printk(KERN_INFO "mydevice: opened device\n");
 	return 0;
@@ -197,8 +213,18 @@ int device_open(struct inode *inode, struct file *filp){
 int searchKey;
 char searchValue[100];
 char failString[3] = "NaN";
+char* saveString = "s";
 ssize_t device_read(struct file* filp, char* bufStoreData, size_t bufCount, loff_t* curOffset){
 	printk(KERN_INFO "mydevice: Reading from device\n");
+
+	if(strcmp(bufStoreData, saveString) == 0){
+		printk(KERN_INFO "mydevice: Sending save data\n");
+		getSaveData();
+		ret = copy_to_user(bufStoreData, saveData, sizeof(saveData));
+		return ret;
+	}
+
+	printk(KERN_INFO "mydevice: reached this far...............\n");
 
 	updateKey(bufStoreData);
 
@@ -223,6 +249,14 @@ ssize_t device_read(struct file* filp, char* bufStoreData, size_t bufCount, loff
 
 char rawInput[100];
 ssize_t device_write(struct file* filp, const char* bufSourceData, size_t bufCount, loff_t* curOffset){
+	
+	printk(KERN_INFO "mydevice: locking device\n");
+
+	if(down_interruptible(&virtual_device.sem) != 0){
+		printk(KERN_ALERT "mydevice: could not lock device during open\n");
+		return -1;
+	}
+
 	printk(KERN_INFO "mydevice: writing to device\n");
 
 	ret = copy_from_user(rawInput, bufSourceData, bufCount);
@@ -233,11 +267,14 @@ ssize_t device_write(struct file* filp, const char* bufSourceData, size_t bufCou
 
 	display();
 
+	up(&virtual_device.sem);
+
+	printk(KERN_INFO "mydevice: unlocked device\n");
+
 	return ret;
 }
 
 int device_close(struct inode *inode, struct file *filp){
-	up(&virtual_device.sem);
 	printk(KERN_INFO "mydevice: closed device\n");
 	return 0;
 }
