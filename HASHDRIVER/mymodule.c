@@ -224,8 +224,6 @@ ssize_t device_read(struct file* filp, char* bufStoreData, size_t bufCount, loff
 		return ret;
 	}
 
-	printk(KERN_INFO "mydevice: reached this far...............\n");
-
 	updateKey(bufStoreData);
 
 	searchKey = (int) key;
