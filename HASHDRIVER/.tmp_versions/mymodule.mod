@@ -1,3 +1,3 @@
-/home/corey/Desktop/HASHDRIVER/mymodule.ko
-/home/corey/Desktop/HASHDRIVER/mymodule.o
+/home/corey/Desktop/LKM_HashTable/HASHDRIVER/mymodule.ko
+/home/corey/Desktop/LKM_HashTable/HASHDRIVER/mymodule.o
 
